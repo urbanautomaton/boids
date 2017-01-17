@@ -11,20 +11,26 @@ var last = null;
 
 for (var i=0; i < BIRDS; i++) {
   vel[i] = $V([20, 20]);
-  pos[i] = $V([X/2 + Math.random() * 50, Y/2 + Math.random() * 50]);
+  pos[i] = $V([X/2 + Math.random() * 100, Y/2 + Math.random() * 100]);
 }
 
-ctx.fillStyle = "green";
 
-function drawBird(i) {
-  var bird = pos[i];
+function drawBird(bird, color) {
+  ctx.fillStyle = color || "green";
+  ctx.beginPath();
+  ctx.arc(bird.e(1), bird.e(2), 3, 0, Math.PI*2, true)
+  ctx.fill();
+  ctx.stroke();
+}
 
-  ctx.fillRect(
-    bird.e(1),
-    bird.e(2),
-    5,
-    5
-  );
+function flockCentroid() {
+  var centroid = $V([0, 0]);
+
+  for (var i=0; i<BIRDS; i++) {
+    centroid = centroid.add(pos[i]);
+  }
+
+  return centroid.x(1/BIRDS);
 }
 
 function step(timestamp) {
@@ -36,8 +42,10 @@ function step(timestamp) {
   for (var i=0; i < BIRDS; i++) {
     pos[i] = pos[i].add(vel[i].x(delta / 1000));
 
-    drawBird(i);
+    drawBird(pos[i]);
   }
+
+  drawBird(flockCentroid(), "red");
 
   window.requestAnimationFrame(step);
 }
