@@ -1,15 +1,16 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-var X = 500;
-var Y = 500;
+var X = 100;
+var Y = 100;
 var BIRDS = 20;
 
 var vel = [];
 var pos = [];
+var last = null;
 
 for (var i=0; i < BIRDS; i++) {
-  vel[i] = $V([.2, .2]);
+  vel[i] = $V([20, 20]);
   pos[i] = $V([X/2 + Math.random() * 50, Y/2 + Math.random() * 50]);
 }
 
@@ -27,20 +28,20 @@ function drawBird(i) {
 }
 
 function step(timestamp) {
-  console.log("Doing a bird as it were");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (!last) { last = timestamp }
   var delta = timestamp - last;
+  last = timestamp;
 
   for (var i=0; i < BIRDS; i++) {
     pos[i] = pos[i].add(vel[i].x(delta / 1000));
 
     drawBird(i);
   }
+
   window.requestAnimationFrame(step);
 }
 
-var last = null;
 
 window.requestAnimationFrame(step);
 
