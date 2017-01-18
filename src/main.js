@@ -4,20 +4,36 @@ var ctx = canvas.getContext("2d");
 var X = 600;
 var Y = 600;
 var BIRDS = 20;
+var ANIMATING = true;
+var MAX_VELOCITY = 100;
 
-var vel = [];
-var pos = [];
-var acc = [];
-var last = null;
+var vel, pos, acc, last;
 
 function randPlusMinus(limit) {
   return (Math.random() - 0.5) * limit * 2;
 }
 
-for (var i=0; i < BIRDS; i++) {
-  vel[i] = $V([randPlusMinus(100), randPlusMinus(100)]);
-  acc[i] = $V([0, 0]);
-  pos[i] = $V([X/2 + randPlusMinus(100), Y/2 + randPlusMinus(100)]);
+function init() {
+  vel = [];
+  pos = [];
+  acc = [];
+  last = null;
+
+  for (var i=0; i < BIRDS; i++) {
+    vel[i] = $V([randPlusMinus(100), randPlusMinus(100)]);
+    acc[i] = $V([0, 0]);
+    pos[i] = $V([X/2 + randPlusMinus(100), Y/2 + randPlusMinus(100)]);
+  }
+}
+
+function toggleAnimation() {
+  if (ANIMATING) {
+    ANIMATING = false;
+  } else {
+    ANIMATING = true;
+    last = null;
+    window.requestAnimationFrame(step);
+  }
 }
 
 function drawCircle(centre, color) {
@@ -30,13 +46,15 @@ function drawCircle(centre, color) {
 
 function drawBird(bird, color) {
   drawCircle(pos[bird], color);
-  drawVector(pos[bird], vel[bird]);
+  // drawVector(pos[bird], vel[bird]);
 }
 
 function eachNeighbour(bird, cb) {
+  var birdPos = pos[bird];
+
   for (var i=0; i<BIRDS; i++) {
-    if (bird === pos[i]) { continue }
-    if (pos[i].subtract(bird).modulus() > 100) { continue }
+    if (bird === i) { continue }
+    if (pos[i].subtract(birdPos).modulus() > 100) { continue }
 
     cb(pos[i]);
   }
@@ -75,7 +93,7 @@ function repelVector(bird) {
   var vector = $V([0, 0]);
 
   eachNeighbour(bird, function(other) {
-    var delta = other.subtract(bird);
+    var delta = other.subtract(pos[bird]);
     var heading = delta.x(-1/delta.modulus());
 
     vector = vector.add(heading);
@@ -84,32 +102,50 @@ function repelVector(bird) {
   return vector;
 }
 
-function birdVelocity(bird) {
-  var _centroid = flockCentroid().subtract(bird);
-  var _heading = flockVector();
-  var _repel = repelVector(bird).x(5);
-
-  return _heading.add(_centroid).add(_repel);
-}
-
 function updateFrameRate(delta) {
-  var rate = 1 / delta * 1000;
+  var rate = 1 / delta;
 
   var element = document.getElementById('frame-rate');
   element.textContent = Math.round(rate * 100) / 100;
 }
 
-function step(timestamp) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (!last) { last = timestamp }
-  var delta = timestamp - last;
-  updateFrameRate(delta);
+function newPosition(bird, delta_t) {
+  return pos[bird].add(
+    vel[bird].x(delta_t)
+  ).add(
+    acc[bird].x(0.5 * delta_t * delta_t)
+  );
+}
 
+function newVelocity(bird, delta_t) {
+  var v1 = vel[bird].add(acc[bird].x(delta_t));
+  if (v1.modulus() > MAX_VELOCITY) {
+    v1 = v1.x(MAX_VELOCITY / v1.modulus());
+  }
+  return v1;
+}
+
+function newAcceleration(bird, delta_t) {
+  var _centroid = flockCentroid().subtract(pos[bird]);
+  var _heading = flockVector();
+  var _repel = repelVector(bird).x(5);
+  var _center = $V([300, 300]).subtract(pos[bird]);
+
+  return _heading.add(_centroid).add(_repel).add(_center);
+}
+
+function step(timestamp) {
+  if (!ANIMATING) { return; }
+  if (!last) { last = timestamp }
+  var delta = (timestamp - last) / 1000;
+  updateFrameRate(delta);
   last = timestamp;
 
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (var i=0; i < BIRDS; i++) {
-    vel[i] = birdVelocity(pos[i]);
-    pos[i] = pos[i].add(vel[i].x(delta / 1000));
+    pos[i] = newPosition(i, delta);
+    vel[i] = newVelocity(i, delta);
+    acc[i] = newAcceleration(i, delta);
 
     drawBird(i);
   }
@@ -120,4 +156,5 @@ function step(timestamp) {
   window.requestAnimationFrame(step);
 }
 
+init();
 window.requestAnimationFrame(step);
