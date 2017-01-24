@@ -54,8 +54,7 @@ function drawTriangle(centre, heading, color, stroke) {
     $V([1.0, 0]),
     $V([0, 0])
   ];
-  var angle = heading.angleFrom($V([0, 1]));
-  if (heading.e(1) > 1) { angle =  -angle; }
+  var angle = heading.angleFrom($V([0, 1])) * -Math.sign(heading.e(1));
 
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -160,23 +159,16 @@ function newAcceleration(bird, delta_t) {
 }
 
 function isNeighbour(bird, other) {
-  if (visibility_matrix[bird][other]) {
-    return true;
-  }
+  return visibility_matrix[bird][other];
 }
 
 function calculateVisibility() {
   for (var i=0; i<BIRDS; i++) {
     for (var j=i; j<BIRDS; j++) {
-      if (i === j) {
-        visibility_matrix[i][j] = 0;
-      } else if (pos[i].subtract(pos[j]).modulus() > NEIGHBOUR_RADIUS) {
-        visibility_matrix[i][j] = 0;
-        visibility_matrix[j][i] = 0;
-      } else {
-        visibility_matrix[i][j] = 1;
-        visibility_matrix[j][i] = 1;
-      }
+      if (i === j) { visibility_matrix[i][i] = false; continue; }
+
+      visibility_matrix[i][j] = visibility_matrix[j][i] =
+        pos[i].subtract(pos[j]).modulus() <= NEIGHBOUR_RADIUS;
     }
   }
 }
@@ -197,9 +189,6 @@ function step(timestamp) {
 
     drawBird(i);
   }
-
-  drawCircle(flockCentroid(), 3, "red", true);
-  drawVector(flockCentroid(), flockVector());
 
   window.requestAnimationFrame(step);
 }
