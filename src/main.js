@@ -3,11 +3,12 @@ var ctx = canvas.getContext("2d");
 
 var X = 600;
 var Y = 600;
-var BIRDS = 20;
+var BIRDS = 25;
 var ANIMATING = true;
 var MAX_VELOCITY = 100;
+var NEIGHBOUR_RADIUS = 100;
 
-var vel, pos, acc, last;
+var vel, pos, acc, last, visibility_matrix;
 
 function randPlusMinus(limit) {
   return (Math.random() - 0.5) * limit * 2;
@@ -18,11 +19,13 @@ function init() {
   pos = [];
   acc = [];
   last = null;
+  visibility_matrix = new Array(BIRDS);
 
   for (var i=0; i < BIRDS; i++) {
     vel[i] = $V([randPlusMinus(100), randPlusMinus(100)]);
     acc[i] = $V([0, 0]);
-    pos[i] = $V([X/2 + randPlusMinus(100), Y/2 + randPlusMinus(100)]);
+    pos[i] = $V([X/2 + randPlusMinus(200), Y/2 + randPlusMinus(200)]);
+    visibility_matrix[i] = new Array(BIRDS);
   }
 }
 
@@ -36,16 +39,18 @@ function toggleAnimation() {
   }
 }
 
-function drawCircle(centre, color) {
-  ctx.fillStyle = color || "green";
+function drawCircle(centre, radius, color, stroke) {
+  ctx.fillStyle = color
   ctx.beginPath();
-  ctx.arc(centre.e(1), centre.e(2), 3, 0, Math.PI*2, true)
+  ctx.arc(centre.e(1), centre.e(2), radius, 0, Math.PI*2, true)
   ctx.fill();
-  ctx.stroke();
+  if (stroke) { ctx.stroke(); }
 }
 
-function drawBird(bird, color) {
-  drawCircle(pos[bird], color);
+function drawBird(bird) {
+  // drawCircle(pos[bird], NEIGHBOUR_RADIUS, "rgba(255, 0, 0, 0.1)");
+  drawCircle(pos[bird], 3, "green", true);
+  drawVector(pos[bird], repelVector(bird));
   // drawVector(pos[bird], vel[bird]);
 }
 
@@ -53,8 +58,8 @@ function eachNeighbour(bird, cb) {
   var birdPos = pos[bird];
 
   for (var i=0; i<BIRDS; i++) {
-    if (bird === i) { continue }
-    if (pos[i].subtract(birdPos).modulus() > 100) { continue }
+    if (bird === i) { continue; }
+    if (!isNeighbour(bird, i)) { continue; }
 
     cb(pos[i]);
   }
@@ -134,6 +139,28 @@ function newAcceleration(bird, delta_t) {
   return _heading.add(_centroid).add(_repel).add(_center);
 }
 
+function isNeighbour(bird, other) {
+  if (visibility_matrix[bird][other]) {
+    return true;
+  }
+}
+
+function calculateVisibility() {
+  for (var i=0; i<BIRDS; i++) {
+    for (var j=i; j<BIRDS; j++) {
+      if (i === j) {
+        visibility_matrix[i][j] = 0;
+      } else if (pos[i].subtract(pos[j]).modulus() > NEIGHBOUR_RADIUS) {
+        visibility_matrix[i][j] = 0;
+        visibility_matrix[j][i] = 0;
+      } else {
+        visibility_matrix[i][j] = 1;
+        visibility_matrix[j][i] = 1;
+      }
+    }
+  }
+}
+
 function step(timestamp) {
   if (!ANIMATING) { return; }
   if (!last) { last = timestamp }
@@ -143,6 +170,7 @@ function step(timestamp) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (var i=0; i < BIRDS; i++) {
+    calculateVisibility();
     pos[i] = newPosition(i, delta);
     vel[i] = newVelocity(i, delta);
     acc[i] = newAcceleration(i, delta);
@@ -150,7 +178,7 @@ function step(timestamp) {
     drawBird(i);
   }
 
-  drawCircle(flockCentroid(), "red");
+  drawCircle(flockCentroid(), 3, "red", true);
   drawVector(flockCentroid(), flockVector());
 
   window.requestAnimationFrame(step);
