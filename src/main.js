@@ -40,17 +40,37 @@ function toggleAnimation() {
 }
 
 function drawCircle(centre, radius, color, stroke) {
-  ctx.fillStyle = color
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(centre.e(1), centre.e(2), radius, 0, Math.PI*2, true)
   ctx.fill();
   if (stroke) { ctx.stroke(); }
 }
 
+function drawTriangle(centre, heading, color, stroke) {
+  var deltas = [
+    $V([-1.0, 0]),
+    $V([0, 3.0]),
+    $V([1.0, 0]),
+    $V([0, 0])
+  ];
+  var angle = heading.angleFrom($V([0, 1]));
+  if (heading.e(1) > 1) { angle =  -angle; }
+
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(centre.e(1), centre.e(2));
+  for (var i=0; i<deltas.length; i++) {
+    var point = centre.add(deltas[i].rotate(angle, $V([0, 0])).x(5));
+    ctx.lineTo(point.e(1), point.e(2));
+  }
+  ctx.fill();
+  if (stroke) { ctx.stroke(); }
+}
+
 function drawBird(bird) {
   // drawCircle(pos[bird], NEIGHBOUR_RADIUS, "rgba(255, 0, 0, 0.1)");
-  drawCircle(pos[bird], 3, "green", true);
-  drawVector(pos[bird], repelVector(bird));
+  drawTriangle(pos[bird], vel[bird], "green", true);
   // drawVector(pos[bird], vel[bird]);
 }
 
