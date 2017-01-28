@@ -5,8 +5,10 @@ var X = 600;
 var Y = 600;
 var BIRDS = 25;
 var ANIMATING = true;
+var ANIMATION_REQUEST_IDS = [];
 var MAX_VELOCITY = 100;
 var NEIGHBOUR_RADIUS = 100;
+var VISIBLE_ANGLE = Math.PI * .8;
 
 var vel, pos, acc, last, visibility_matrix;
 
@@ -30,7 +32,12 @@ function init() {
 }
 
 function pause() {
-  ANIMATING = false;
+  if (ANIMATING) {
+    ANIMATING = false;
+    for (var i=0; i<ANIMATION_REQUEST_IDS.length; i++) {
+      window.cancelAnimationFrame(ANIMATION_REQUEST_IDS[i]);
+    }
+  }
 }
 
 function play() {
@@ -200,11 +207,14 @@ function step(timestamp) {
     drawBird(i);
   }
 
-  window.requestAnimationFrame(step);
+  if (ANIMATING) {
+    ANIMATION_REQUEST_IDS.push(window.requestAnimationFrame(step));
+  }
 }
 
 init();
-window.requestAnimationFrame(step);
+
+ANIMATION_REQUEST_IDS.push(window.requestAnimationFrame(step));
 
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState === 'hidden') {
