@@ -8,7 +8,7 @@ var ANIMATING = true;
 var ANIMATION_REQUEST_IDS = [];
 var MIN_VELOCITY = 40;
 var MAX_VELOCITY = 120;
-var NEIGHBOUR_RADIUS = 100;
+var NEIGHBOUR_RADIUS = 75;
 var VISIBLE_ANGLE = Math.PI * .8;
 
 var vel, pos, acc, last, visibility_matrix;
@@ -172,8 +172,9 @@ function newAcceleration(bird, delta_t) {
   var _heading = flockVector();
   var _repel = repelVector(bird).x(10);
   var _center = $V([300, 300]).subtract(pos[bird]);
-  if (_center.modulus() > 100) {
-    _center = _center.x(100 / _center.modulus());
+  var CENTER_LIMIT = 150
+  if (_center.modulus() > CENTER_LIMIT) {
+    _center = _center.x(CENTER_LIMIT / _center.modulus());
   }
 
   return _heading.add(_centroid).add(_repel).add(_center);
