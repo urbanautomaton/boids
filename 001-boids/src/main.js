@@ -29,13 +29,23 @@ function init() {
   }
 }
 
-function toggleAnimation() {
-  if (ANIMATING) {
-    ANIMATING = false;
-  } else {
+function pause() {
+  ANIMATING = false;
+}
+
+function play() {
+  if (!ANIMATING) {
     ANIMATING = true;
     last = null;
     window.requestAnimationFrame(step);
+  }
+}
+
+function toggleAnimation() {
+  if (ANIMATING) {
+    pause();
+  } else {
+    play();
   }
 }
 
@@ -195,3 +205,11 @@ function step(timestamp) {
 
 init();
 window.requestAnimationFrame(step);
+
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') {
+    pause();
+  } else {
+    play();
+  }
+});
