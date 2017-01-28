@@ -172,6 +172,9 @@ function newAcceleration(bird, delta_t) {
   var _heading = flockVector();
   var _repel = repelVector(bird).x(10);
   var _center = $V([300, 300]).subtract(pos[bird]);
+  if (_center.modulus() > 100) {
+    _center = _center.x(100 / _center.modulus());
+  }
 
   return _heading.add(_centroid).add(_repel).add(_center);
 }
