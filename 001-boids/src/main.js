@@ -6,7 +6,8 @@ var Y = 600;
 var BIRDS = 25;
 var ANIMATING = true;
 var ANIMATION_REQUEST_IDS = [];
-var MAX_VELOCITY = 100;
+var MIN_VELOCITY = 40;
+var MAX_VELOCITY = 120;
 var NEIGHBOUR_RADIUS = 100;
 var VISIBLE_ANGLE = Math.PI * .8;
 
@@ -85,9 +86,7 @@ function drawTriangle(centre, heading, color, stroke) {
 }
 
 function drawBird(bird) {
-  // drawCircle(pos[bird], NEIGHBOUR_RADIUS, "rgba(255, 0, 0, 0.1)");
   drawTriangle(pos[bird], vel[bird], "green", true);
-  // drawVector(pos[bird], vel[bird]);
 }
 
 function eachNeighbour(bird, cb) {
@@ -162,6 +161,8 @@ function newVelocity(bird, delta_t) {
   var v1 = vel[bird].add(acc[bird].x(delta_t));
   if (v1.modulus() > MAX_VELOCITY) {
     v1 = v1.x(MAX_VELOCITY / v1.modulus());
+  } else if (v1.modulus() < MIN_VELOCITY) {
+    v1 = v1.x(MIN_VELOCITY / v1.modulus());
   }
   return v1;
 }
@@ -169,7 +170,7 @@ function newVelocity(bird, delta_t) {
 function newAcceleration(bird, delta_t) {
   var _centroid = flockCentroid().subtract(pos[bird]);
   var _heading = flockVector();
-  var _repel = repelVector(bird).x(5);
+  var _repel = repelVector(bird).x(10);
   var _center = $V([300, 300]).subtract(pos[bird]);
 
   return _heading.add(_centroid).add(_repel).add(_center);
