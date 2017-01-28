@@ -182,10 +182,15 @@ function isNeighbour(bird, other) {
 function calculateVisibility() {
   for (var i=0; i<BIRDS; i++) {
     for (var j=i; j<BIRDS; j++) {
-      if (i === j) { visibility_matrix[i][i] = false; continue; }
+      var iToj = pos[j].subtract(pos[i]);
 
-      visibility_matrix[i][j] = visibility_matrix[j][i] =
-        pos[i].subtract(pos[j]).modulus() <= NEIGHBOUR_RADIUS;
+      if (i === j) {
+        visibility_matrix[i][i] = false;
+      } else if (iToj.modulus() <= NEIGHBOUR_RADIUS) {
+        visibility_matrix[i][j] = (vel[i].angleFrom(iToj) < VISIBLE_ANGLE);
+        visibility_matrix[j][i]  = (vel[j].angleFrom(iToj.x(-1)) < VISIBLE_ANGLE);
+      }
+
     }
   }
 }
