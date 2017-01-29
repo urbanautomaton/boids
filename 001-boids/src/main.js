@@ -1,8 +1,9 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-var X = 600;
-var Y = 600;
+var X = canvas.width;
+var Y = canvas.height;
+var SCALE = 1;
 var BIRDS = 75;
 var ANIMATING = true;
 var ANIMATION_REQUEST_IDS = [];
@@ -10,7 +11,7 @@ var MIN_VELOCITY = 40;
 var MAX_VELOCITY = 120;
 var NEIGHBOUR_RADIUS = 75;
 var VISIBLE_ANGLE = Math.PI * .8;
-var GOAL = $V([X/2, Y/2]);
+var GOAL = $V([0, 0]);
 var GOAL_LIMIT = 150;
 
 var vel, pos, acc, last, visibility_matrix;
@@ -24,6 +25,10 @@ function randPlusMinus(limit) {
   return (Math.random() - 0.5) * limit * 2;
 }
 
+ctx.save();
+ctx.translate(X/2, Y/2);
+ctx.scale(SCALE, SCALE);
+
 function init() {
   vel = [];
   pos = [];
@@ -34,7 +39,7 @@ function init() {
   for (var i=0; i < BIRDS; i++) {
     vel[i] = $V([randPlusMinus(100), randPlusMinus(100)]);
     acc[i] = $V([0, 0]);
-    pos[i] = $V([X/2 + randPlusMinus(X/3), Y/2 + randPlusMinus(Y/3)]);
+    pos[i] = $V([randPlusMinus(200), randPlusMinus(200)]);
     visibility_matrix[i] = new Array(BIRDS);
   }
 }
@@ -120,7 +125,9 @@ function updateFrameRate(delta) {
   var rate = 1 / delta;
 
   var element = document.getElementById('frame-rate');
-  element.textContent = Math.round(rate * 100) / 100;
+  if (element) {
+    element.textContent = Math.round(rate * 100) / 100;
+  }
 }
 
 function sees(delta, velocity) {
@@ -154,7 +161,7 @@ function clamp(vector, min, max) {
   }
 }
 
-function centering(from) {
+function goalSeeking(from) {
   var heading = GOAL.subtract(from);;
 
   return clamp(heading, 0, GOAL_LIMIT);
@@ -183,14 +190,14 @@ function updateAcceleration() {
 
     var heading = sumVectors(headings).x(1/headings.length);
     var centroid = sumVectors(centroids).x(1/centroids.length);
-    var center = centering(pos[i]);
+    var goal = goalSeeking(pos[i]);
 
     allRepels.push(repel);
     allHeadings.push(heading);
     allCentroids.push(centroid);
-    allGoals.push(center);
+    allGoals.push(goal);
 
-    acc[i] = repel.add(heading).add(centroid).add(center);
+    acc[i] = repel.add(heading).add(centroid).add(goal);
   }
 }
 
@@ -221,7 +228,7 @@ function step(timestamp) {
   updateFrameRate(delta_t);
   last = timestamp;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(-X/(2*SCALE), -Y/(2*SCALE), X/SCALE, Y/SCALE);
 
   updateAcceleration();
   updateVelocity(delta_t);
@@ -239,7 +246,7 @@ init();
 ANIMATION_REQUEST_IDS.push(window.requestAnimationFrame(step));
 
 function updateGoal() {
-  GOAL = $V([X/2, Y/2]).add($V([randPlusMinus(X/4), randPlusMinus(Y/4)]));
+  GOAL = $V([randPlusMinus(X/4), randPlusMinus(Y/4)]);
   window.setTimeout(updateGoal, 5000);
 }
 
