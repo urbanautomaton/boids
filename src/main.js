@@ -3,12 +3,12 @@ var ctx = canvas.getContext("2d");
 
 var X = canvas.width;
 var Y = canvas.height;
-var SCALE = 1;
+var SCALE = 0.5;
 var BIRDS = 75;
 var ANIMATING = true;
 var ANIMATION_REQUEST_IDS = [];
 var MIN_VELOCITY = 40;
-var MAX_VELOCITY = 120;
+var MAX_VELOCITY = 150;
 var NEIGHBOUR_RADIUS = 75;
 var VISIBLE_ANGLE = Math.PI * .8;
 var GOAL = $V([0, 0]);
@@ -138,7 +138,7 @@ function sees(delta, velocity) {
 }
 
 function repelVector(delta) {
-  return delta.toUnitVector().x(-1);
+  return delta.toUnitVector().x(-20/delta.modulus());
 }
 
 function meanVector(vs) {
