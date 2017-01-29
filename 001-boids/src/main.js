@@ -4,7 +4,7 @@ var ctx = canvas.getContext("2d");
 var X = canvas.width;
 var Y = canvas.height;
 var SCALE = 0.5;
-var BIRDS = 75;
+var BIRDS = 150;
 var ANIMATING = true;
 var ANIMATION_REQUEST_IDS = [];
 var MIN_VELOCITY = 40;
@@ -138,7 +138,7 @@ function sees(delta, velocity) {
 }
 
 function repelVector(delta) {
-  return delta.toUnitVector().x(-20/delta.modulus());
+  return delta.toUnitVector().x(-30/delta.modulus());
 }
 
 function meanVector(vs) {
@@ -196,7 +196,7 @@ function updateAcceleration() {
       }
     }
 
-    var heading = meanVector(headings);
+    var heading = meanVector(headings).x(1.5);
     var centroid = meanVector(centroids);
     var goal = goalSeeking(pos[i]);
 
@@ -254,7 +254,7 @@ init();
 ANIMATION_REQUEST_IDS.push(window.requestAnimationFrame(step));
 
 function updateGoal() {
-  GOAL = $V([randPlusMinus(X/4), randPlusMinus(Y/4)]);
+  GOAL = $V([randPlusMinus(X/3), randPlusMinus(Y/3)]);
   window.setTimeout(updateGoal, 5000);
 }
 
