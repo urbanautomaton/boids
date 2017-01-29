@@ -3,15 +3,22 @@ var ctx = canvas.getContext("2d");
 
 var X = 600;
 var Y = 600;
-var BIRDS = 25;
+var BIRDS = 75;
 var ANIMATING = true;
 var ANIMATION_REQUEST_IDS = [];
 var MIN_VELOCITY = 40;
 var MAX_VELOCITY = 120;
 var NEIGHBOUR_RADIUS = 75;
 var VISIBLE_ANGLE = Math.PI * .8;
+var GOAL = $V([X/2, Y/2]);
+var GOAL_LIMIT = 150;
 
 var vel, pos, acc, last, visibility_matrix;
+
+var allRepels;
+var allHeadings;
+var allCentroids;
+var allGoals;
 
 function randPlusMinus(limit) {
   return (Math.random() - 0.5) * limit * 2;
@@ -27,7 +34,7 @@ function init() {
   for (var i=0; i < BIRDS; i++) {
     vel[i] = $V([randPlusMinus(100), randPlusMinus(100)]);
     acc[i] = $V([0, 0]);
-    pos[i] = $V([X/2 + randPlusMinus(200), Y/2 + randPlusMinus(200)]);
+    pos[i] = $V([X/2 + randPlusMinus(X/3), Y/2 + randPlusMinus(Y/3)]);
     visibility_matrix[i] = new Array(BIRDS);
   }
 }
@@ -86,60 +93,27 @@ function drawTriangle(centre, heading, color, stroke) {
 }
 
 function drawBird(bird) {
+  if (bird === 1) {
+    drawCircle(pos[bird], NEIGHBOUR_RADIUS, "rgba(255, 0, 0, 0.1)");
+    drawVector(pos[bird], allRepels[bird], "red");
+    drawVector(pos[bird], allHeadings[bird], "green");
+    drawVector(pos[bird], allCentroids[bird], "black");
+    drawVector(pos[bird], allGoals[bird], "blue");
+  }
   drawTriangle(pos[bird], vel[bird], "green", true);
 }
 
-function eachNeighbour(bird, cb) {
-  var birdPos = pos[bird];
-
-  for (var i=0; i<BIRDS; i++) {
-    if (bird === i) { continue; }
-    if (!isNeighbour(bird, i)) { continue; }
-
-    cb(pos[i]);
-  }
-}
-
-function drawVector(start, vector) {
+function drawVector(start, vector, color) {
   var newPos = start.add(vector);
+  var originalStrokeStyle = ctx.strokeStyle;
 
+  ctx.strokeStyle = color || "black";
   ctx.beginPath();
   ctx.moveTo(start.e(1), start.e(2));
   ctx.lineTo(newPos.e(1), newPos.e(2));
   ctx.stroke();
-}
 
-function flockCentroid() {
-  var centroid = $V([0, 0]);
-
-  for (var i=0; i<BIRDS; i++) {
-    centroid = centroid.add(pos[i]);
-  }
-
-  return centroid.x(1/BIRDS);
-}
-
-function flockVector() {
-  var vector = $V([0, 0]);
-
-  for (var i=0; i<BIRDS; i++) {
-    vector = vector.add(vel[i]);
-  }
-
-  return vector.x(1/BIRDS);
-}
-
-function repelVector(bird) {
-  var vector = $V([0, 0]);
-
-  eachNeighbour(bird, function(other) {
-    var delta = other.subtract(pos[bird]);
-    var heading = delta.x(-1/delta.modulus());
-
-    vector = vector.add(heading);
-  });
-
-  return vector;
+  ctx.strokeStyle = originalStrokeStyle;
 }
 
 function updateFrameRate(delta) {
@@ -149,73 +123,111 @@ function updateFrameRate(delta) {
   element.textContent = Math.round(rate * 100) / 100;
 }
 
-function newPosition(bird, delta_t) {
-  return pos[bird].add(
-    vel[bird].x(delta_t)
-  ).add(
-    acc[bird].x(0.5 * delta_t * delta_t)
+function sees(delta, velocity) {
+  return (
+    delta.modulus() <= NEIGHBOUR_RADIUS &&
+    velocity.angleFrom(delta) < VISIBLE_ANGLE
   );
 }
 
-function newVelocity(bird, delta_t) {
-  var v1 = vel[bird].add(acc[bird].x(delta_t));
-  if (v1.modulus() > MAX_VELOCITY) {
-    v1 = v1.x(MAX_VELOCITY / v1.modulus());
-  } else if (v1.modulus() < MIN_VELOCITY) {
-    v1 = v1.x(MIN_VELOCITY / v1.modulus());
+function repelVector(delta) {
+  return delta.toUnitVector().x(-1);
+}
+
+function sumVectors(vs) {
+  return _.reduce(
+    vs,
+    function(sum, el) { return sum.add(el); },
+    $V([0, 0])
+  );
+}
+
+function clamp(vector, min, max) {
+  var mod = vector.modulus();
+
+  if (mod > max) {
+    return vector.x(max / mod);
+  } else if (mod < min) {
+    return vector.x(min / mod);
+  } else {
+    return vector;
   }
-  return v1;
 }
 
-function newAcceleration(bird, delta_t) {
-  var _centroid = flockCentroid().subtract(pos[bird]);
-  var _heading = flockVector();
-  var _repel = repelVector(bird).x(10);
-  var _center = $V([300, 300]).subtract(pos[bird]);
-  var CENTER_LIMIT = 150
-  if (_center.modulus() > CENTER_LIMIT) {
-    _center = _center.x(CENTER_LIMIT / _center.modulus());
-  }
+function centering(from) {
+  var heading = GOAL.subtract(from);;
 
-  return _heading.add(_centroid).add(_repel).add(_center);
+  return clamp(heading, 0, GOAL_LIMIT);
 }
 
-function isNeighbour(bird, other) {
-  return visibility_matrix[bird][other];
-}
+function updateAcceleration() {
+  allRepels = [];
+  allHeadings = [];
+  allCentroids = [];
+  allGoals = [];
 
-function calculateVisibility() {
   for (var i=0; i<BIRDS; i++) {
-    for (var j=i; j<BIRDS; j++) {
+    var repel = $V([0, 0]);
+    var headings = [];
+    var centroids = [];
+
+    for (var j=0; j<BIRDS; j++) {
       var iToj = pos[j].subtract(pos[i]);
 
-      if (i === j) {
-        visibility_matrix[i][i] = false;
-      } else if (iToj.modulus() <= NEIGHBOUR_RADIUS) {
-        visibility_matrix[i][j] = (vel[i].angleFrom(iToj) < VISIBLE_ANGLE);
-        visibility_matrix[j][i]  = (vel[j].angleFrom(iToj.x(-1)) < VISIBLE_ANGLE);
+      if (sees(iToj, vel[i])) {
+        repel = repel.add(repelVector(iToj).x(15));
+        headings.push(vel[j]);
+        centroids.push(iToj);
       }
-
     }
+
+    var heading = sumVectors(headings).x(1/headings.length);
+    var centroid = sumVectors(centroids).x(1/centroids.length);
+    var center = centering(pos[i]);
+
+    allRepels.push(repel);
+    allHeadings.push(heading);
+    allCentroids.push(centroid);
+    allGoals.push(center);
+
+    acc[i] = repel.add(heading).add(centroid).add(center);
   }
+}
+
+function updateVelocity(delta_t) {
+  for (var i=0; i<BIRDS; i++) {
+    var v1 = vel[i].add(acc[i].x(delta_t));
+
+    vel[i] = clamp(v1, MIN_VELOCITY, MAX_VELOCITY);
+  }
+}
+
+function updatePosition(delta_t) {
+  for (var i=0; i<BIRDS; i++) {
+    pos[i] = pos[i].
+      add(vel[i].x(delta_t)).
+      add(acc[i].x(0.5 * delta_t * delta_t));
+  }
+}
+
+function drawBirds() {
+  for (var i=0; i<BIRDS; i++) { drawBird(i); }
 }
 
 function step(timestamp) {
   if (!ANIMATING) { return; }
   if (!last) { last = timestamp }
-  var delta = (timestamp - last) / 1000;
-  updateFrameRate(delta);
+  var delta_t = (timestamp - last) / 1000;
+  updateFrameRate(delta_t);
   last = timestamp;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (var i=0; i < BIRDS; i++) {
-    calculateVisibility();
-    pos[i] = newPosition(i, delta);
-    vel[i] = newVelocity(i, delta);
-    acc[i] = newAcceleration(i, delta);
 
-    drawBird(i);
-  }
+  updateAcceleration();
+  updateVelocity(delta_t);
+  updatePosition(delta_t);
+  drawBirds();
+  drawCircle(GOAL, 3, "red", true);
 
   if (ANIMATING) {
     ANIMATION_REQUEST_IDS.push(window.requestAnimationFrame(step));
@@ -225,6 +237,13 @@ function step(timestamp) {
 init();
 
 ANIMATION_REQUEST_IDS.push(window.requestAnimationFrame(step));
+
+function updateGoal() {
+  GOAL = $V([X/2, Y/2]).add($V([randPlusMinus(X/4), randPlusMinus(Y/4)]));
+  window.setTimeout(updateGoal, 5000);
+}
+
+updateGoal();
 
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState === 'hidden') {
