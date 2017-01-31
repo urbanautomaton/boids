@@ -1,10 +1,21 @@
-function Animation(win, draw) {
+function Animation(doc, win, draw) {
+  this._document = doc;
   this._window = win;
   this._animating = false;
   this._animation_request_ids = [];
   this._last = null;
   this._draw = draw;
   this.frameRate = 0;
+
+  var obj = this;
+  // sort this out so it doesn't clobber animating state
+  this._document.addEventListener('visibilitychange', function() {
+    if (obj._document.visibilityState === 'hidden') {
+      obj.pause();
+    } else {
+      obj.play();
+    }
+  });
 }
 
 Animation.prototype._getNextFrame = function() {
