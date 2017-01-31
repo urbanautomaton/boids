@@ -73,13 +73,7 @@ function draw(delta_t) {
   drawCircle(simulation._goal, 3, "red", true);
 }
 
-function updateGoal() {
-  simulation.updateGoal();
-  window.setTimeout(updateGoal, 5000);
-}
-
 var simulation = new Birds(2, Math.sqrt(X**2 + Y**2), BIRDS);
 var animation = new Animation(document, window, draw);
-simulation.init();
+
 animation.play();
-updateGoal();
