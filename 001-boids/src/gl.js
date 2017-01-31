@@ -2,8 +2,8 @@
 const container = document.querySelector('#container');
 
 // Set the scene size.
-const X = 640;
-const Y = 480;
+const X = 1280;
+const Y = 720;
 
 // Set some camera attributes.
 const VIEW_ANGLE = 45;
@@ -36,39 +36,26 @@ renderer.setSize(X, Y);
 // DOM element.
 container.appendChild(renderer.domElement);
 
-// Set up the sphere vars
+// Set up the bird vars
 const RADIUS = 5;
-const SEGMENTS = 16;
-const RINGS = 16;
+const HEIGHT = 15;
 
-// create the sphere's material
-const sphereMaterial = new THREE.MeshLambertMaterial( {
-  color: 0xCC0000
-});
+// create the bird's material
+const birdMaterial = new THREE.MeshPhongMaterial( {
+  color: 0x156289,
+  emissive: 0x072534,
+  side: THREE.DoubleSide,
+  shading: THREE.FlatShading
+} )
 
 // Create a new mesh with
-// sphere geometry - we will cover
-// the sphereMaterial next!
-const sphere = new THREE.Mesh(
+// bird geometry - we will cover
+// the birdMaterial next!
+const bird = new THREE.Mesh(
 
-  new THREE.SphereGeometry(
-    RADIUS,
-    SEGMENTS,
-    RINGS),
+  new THREE.ConeGeometry(RADIUS, HEIGHT),
 
-  sphereMaterial);
-
-// sphere.position.z = -300
-
-// for (var i=0; i<100; i++) {
-//   var range = 300
-//   var clone = sphere.clone();
-//   clone.position.x += (Math.random() * range) - range/2;
-//   clone.position.y += (Math.random() * range) - range/2;
-//   clone.position.z += (Math.random() * range) - range/2;
-//   console.log(clone.position);
-//   scene.add(clone);
-// }
+  birdMaterial);
 
 // create a point light
 const pointLight = new THREE.PointLight(0xFFFFFF);
@@ -81,10 +68,15 @@ pointLight.position.z = 130;
 // add to the scene
 scene.add(pointLight);
 
-var BIRDS = 150;
+var BIRDS = 300;
 
 function drawBird(i, pos, vel, acc) {
-  spheres[i].position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
+  var direction = new THREE.Vector3(vel.e(1), vel.e(2), vel.e(3)).normalize();
+  var rotation_axis = new THREE.Vector3(0, 1, 0);
+
+  var _look = pos.add(vel);
+  birds[i].position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
+  birds[i].quaternion.setFromUnitVectors(rotation_axis, direction);
 }
 
 function updateFrameRate(delta_t) {
@@ -108,13 +100,13 @@ function draw(delta_t) {
 var simulation = new Birds(3, Math.sqrt(X**2 + Y**2), BIRDS);
 var animation = new Animation(document, window, draw);
 
-var spheres = [];
+var birds = [];
 
 simulation.eachBird(function(i, pos) {
-  var bird = sphere.clone();
-  spheres.push(bird);
-  bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
-  scene.add(bird);
+  var _bird = bird.clone();
+  birds.push(_bird);
+  _bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
+  scene.add(_bird);
 });
 
 animation.play();
