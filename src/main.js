@@ -5,8 +5,6 @@ var X = canvas.width;
 var Y = canvas.height;
 var SCALE = 0.5;
 var BIRDS = 150;
-var ANIMATING = true;
-var ANIMATION_REQUEST_IDS = [];
 
 ctx.save();
 ctx.translate(canvas.width/2, canvas.height/2);
@@ -75,22 +73,13 @@ function draw(delta_t) {
   drawCircle(simulation._goal, 3, "red", true);
 }
 
-var simulation = new Birds(2, Math.sqrt(X**2 + Y**2), BIRDS);
-simulation.init();
-var animation = new Animation(window, draw);
-
 function updateGoal() {
   simulation.updateGoal();
   window.setTimeout(updateGoal, 5000);
 }
 
+var simulation = new Birds(2, Math.sqrt(X**2 + Y**2), BIRDS);
+var animation = new Animation(document, window, draw);
+simulation.init();
 updateGoal();
 animation.play();
-
-document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'hidden') {
-    animation.pause();
-  } else {
-    animation.play();
-  }
-});
