@@ -129,6 +129,6 @@ Birds.prototype.tick = function(delta_t) {
 
 Birds.prototype.eachBird = function(cb) {
   for (var i=0; i<this._birds; i++) {
-    cb(this._pos[i], this._vel[i], this._acc[i]);
+    cb(i, this._pos[i], this._vel[i], this._acc[i]);
   }
 };
