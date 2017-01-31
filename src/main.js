@@ -38,7 +38,7 @@ function drawTriangle(centre, heading, color, stroke) {
   if (stroke) { ctx.stroke(); }
 }
 
-function drawBird(pos, vel, acc) {
+function drawBird(i, pos, vel, acc) {
   drawTriangle(pos, vel, "green", true);
 }
 
