@@ -14,7 +14,7 @@ Birds.prototype._meanVector = function(vs) {
   var sum = _.reduce(
     vs,
     function(sum, el) { return sum.add(el); },
-    $V([0, 0])
+    Vector.Zero(this._dimensions)
   );
 
   if (vs.length > 1) {
