@@ -12,35 +12,6 @@ ctx.save();
 ctx.translate(canvas.width/2, canvas.height/2);
 ctx.scale(SCALE, SCALE);
 
-var last;
-var simulation = new Birds(2, Math.sqrt(X**2 + Y**2), BIRDS);
-simulation.init();
-
-function pause() {
-  if (ANIMATING) {
-    ANIMATING = false;
-    for (var i=0; i<ANIMATION_REQUEST_IDS.length; i++) {
-      window.cancelAnimationFrame(ANIMATION_REQUEST_IDS[i]);
-    }
-  }
-}
-
-function play() {
-  if (!ANIMATING) {
-    ANIMATING = true;
-    last = null;
-    window.requestAnimationFrame(step);
-  }
-}
-
-function toggleAnimation() {
-  if (ANIMATING) {
-    pause();
-  } else {
-    play();
-  }
-}
-
 function drawCircle(centre, radius, color, stroke) {
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -70,13 +41,6 @@ function drawTriangle(centre, heading, color, stroke) {
 }
 
 function drawBird(pos, vel, acc) {
-  // if (bird === 1) {
-  //   drawCircle(pos[bird], NEIGHBOUR_RADIUS, "rgba(255, 0, 0, 0.1)");
-  //   drawVector(pos[bird], allRepels[bird], "red");
-  //   drawVector(pos[bird], allHeadings[bird], "green");
-  //   drawVector(pos[bird], allCentroids[bird], "black");
-  //   drawVector(pos[bird], allGoals[bird], "blue");
-  // }
   drawTriangle(pos, vel, "green", true);
 }
 
@@ -102,29 +66,18 @@ function updateFrameRate(delta) {
   }
 }
 
-function step(timestamp) {
-  if (!ANIMATING) { return; }
-  if (!last) { last = timestamp }
-  var delta_t = (timestamp - last) / 1000;
-  last = timestamp;
-
-  ctx.clearRect(-X/(2*SCALE), -Y/(2*SCALE), X/SCALE, Y/SCALE);
-
+function draw(delta_t) {
   updateFrameRate(delta_t);
   simulation.tick(delta_t);
+
+  ctx.clearRect(-X/(2*SCALE), -Y/(2*SCALE), X/SCALE, Y/SCALE);
   simulation.eachBird(drawBird);
   drawCircle(simulation._goal, 3, "red", true);
-
-  if (ANIMATING) {
-    ANIMATION_REQUEST_IDS.push(window.requestAnimationFrame(step));
-  }
 }
 
-ANIMATION_REQUEST_IDS.push(window.requestAnimationFrame(step));
-
-function init() {
-  simulation.init();
-}
+var simulation = new Birds(2, Math.sqrt(X**2 + Y**2), BIRDS);
+simulation.init();
+var animation = new Animation(window, draw);
 
 function updateGoal() {
   simulation.updateGoal();
@@ -132,11 +85,12 @@ function updateGoal() {
 }
 
 updateGoal();
+animation.play();
 
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState === 'hidden') {
-    pause();
+    animation.pause();
   } else {
-    play();
+    animation.play();
   }
 });
