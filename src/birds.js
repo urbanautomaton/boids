@@ -59,6 +59,12 @@ Birds.prototype._goalSeeking = function(from) {
   return this._clamp(heading, 0, this._goal_limit);
 }
 
+Birds.prototype._updateGoal = function() {
+  var obj = this;
+  this._goal = this._randomVector(this._size / 3);
+  window.setTimeout(function() { obj._updateGoal(); }, 5000);
+}
+
 Birds.prototype._updateAcceleration = function() {
   for (var i=0; i<this._birds; i++) {
     var repel = Vector.Zero(this._dimensions);
@@ -102,7 +108,7 @@ Birds.prototype._updatePosition = function(delta_t) {
 }
 
 Birds.prototype.init = function() {
-  this.updateGoal();
+  this._updateGoal();
   this._vel    = [];
   this._pos    = [];
   this._acc    = [];
@@ -120,10 +126,6 @@ Birds.prototype.tick = function(delta_t) {
   this._updateVelocity(delta_t);
   this._updatePosition(delta_t);
 };
-
-Birds.prototype.updateGoal = function() {
-  this._goal = this._randomVector(this._size / 3);
-}
 
 Birds.prototype.eachBird = function(cb) {
   for (var i=0; i<this._birds; i++) {
