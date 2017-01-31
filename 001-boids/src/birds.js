@@ -102,7 +102,7 @@ Birds.prototype._updatePosition = function(delta_t) {
 }
 
 Birds.prototype.init = function() {
-  this._goal   = Vector.Zero(this._dimensions);
+  this.updateGoal();
   this._vel    = [];
   this._pos    = [];
   this._acc    = [];
