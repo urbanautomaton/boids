@@ -40,22 +40,32 @@ container.appendChild(renderer.domElement);
 const RADIUS = 5;
 const HEIGHT = 15;
 
+const goalMaterial = new THREE.MeshPhongMaterial({
+  color: 0xCC0000,
+  emissive: 0x340725,
+  side: THREE.DoubleSide,
+  shading: THREE.FlatShading
+});
+
+const goal = new THREE.Mesh(
+  new THREE.SphereGeometry(RADIUS),
+  goalMaterial
+);
+
+scene.add(goal);
+
 // create the bird's material
-const birdMaterial = new THREE.MeshPhongMaterial( {
+const birdMaterial = new THREE.MeshPhongMaterial({
   color: 0x156289,
   emissive: 0x072534,
   side: THREE.DoubleSide,
   shading: THREE.FlatShading
-} )
+});
 
-// Create a new mesh with
-// bird geometry - we will cover
-// the birdMaterial next!
 const bird = new THREE.Mesh(
-
   new THREE.ConeGeometry(RADIUS, HEIGHT),
-
-  birdMaterial);
+  birdMaterial
+);
 
 // create a point light
 const pointLight = new THREE.PointLight(0xFFFFFF);
@@ -68,7 +78,7 @@ pointLight.position.z = 130;
 // add to the scene
 scene.add(pointLight);
 
-var BIRDS = 300;
+var BIRDS = 150;
 
 function drawBird(i, pos, vel, acc) {
   var direction = new THREE.Vector3(vel.e(1), vel.e(2), vel.e(3)).normalize();
@@ -92,9 +102,11 @@ function draw(delta_t) {
   updateFrameRate(delta_t);
   simulation.tick(delta_t);
 
+  var _goal = simulation._goal;
+
   renderer.render(scene, camera);
   simulation.eachBird(drawBird);
-  // drawCircle(simulation._goal, 3, "red", true);
+  goal.position.set(_goal.e(1), _goal.e(2), _goal.e(3) - 600);
 }
 
 var simulation = new Birds(3, Math.sqrt(X**2 + Y**2), BIRDS);
