@@ -3,7 +3,7 @@ function Birds(dimensions, size, birds) {
   this._size             = size;
   this._birds            = birds;
   this._min_velocity     = 40;
-  this._max_velocity     = 150;
+  this._max_velocity     = 200;
   this._neighbour_radius = 75;
   this._visible_angle    = Math.PI * .8;
   this._goal_limit       = 150;
