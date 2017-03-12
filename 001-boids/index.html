@@ -1,12 +1,8 @@
 <head>
-<script src="vendor/underscore-min.js" type="text/javascript"></script>
-<script src="vendor/sylvester.js" type="text/javascript"></script>
 <style>canvas { border: 1px solid black; }</style>
 </head>
 <canvas id="canvas" width="600" height="600"></canvas>
 <div id="frame-rate"></div>
-<button onclick="simulation.init();">Reset</button>
-<button onclick="animation.toggle();">Pause/Play</button>
-<script src="src/birds.js" type="text/javascript"></script>
-<script src="src/animation.js" type="text/javascript"></script>
-<script src="src/main.js" type="text/javascript"></script>
+<button id="reset-sim">Reset</button>
+<button id="toggle-anim">Pause/Play</button>
+<script src="dist/bundle.js" type="text/javascript"></script>

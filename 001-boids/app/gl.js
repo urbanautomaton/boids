@@ -1,3 +1,9 @@
+import _ from 'lodash';
+import { Vector } from '../vendor/sylvester';
+import * as THREE from 'three';
+import Birds from './birds';
+import Animation from './animation';
+
 // Get the DOM element to attach to
 const container = document.querySelector('#container');
 
@@ -120,5 +126,11 @@ simulation.eachBird(function(i, pos) {
   _bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
   scene.add(_bird);
 });
+
+var reset = document.getElementById('reset-sim');
+var toggle = document.getElementById('toggle-anim');
+
+if (reset) { reset.addEventListener('click', simulation.init.bind(simulation), false); }
+if (toggle) { toggle.addEventListener('click', animation.toggle.bind(animation), false); }
 
 animation.play();

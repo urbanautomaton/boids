@@ -1,3 +1,8 @@
+import _ from 'lodash';
+import { Vector } from '../vendor/sylvester';
+import Birds from './birds';
+import Animation from './animation';
+
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
@@ -20,18 +25,18 @@ function drawCircle(centre, radius, color, stroke) {
 
 function drawTriangle(centre, heading, color, stroke) {
   var deltas = [
-    $V([-1.0, 0]),
-    $V([0, 3.0]),
-    $V([1.0, 0]),
-    $V([0, 0])
+    Vector.create([-1.0, 0]),
+    Vector.create([0, 3.0]),
+    Vector.create([1.0, 0]),
+    Vector.create([0, 0])
   ];
-  var angle = heading.angleFrom($V([0, 1])) * -Math.sign(heading.e(1));
+  var angle = heading.angleFrom(Vector.create([0, 1])) * -Math.sign(heading.e(1));
 
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(centre.e(1), centre.e(2));
   for (var i=0; i<deltas.length; i++) {
-    var point = centre.add(deltas[i].rotate(angle, $V([0, 0])).x(5));
+    var point = centre.add(deltas[i].rotate(angle, Vector.create([0, 0])).x(5));
     ctx.lineTo(point.e(1), point.e(2));
   }
   ctx.fill();
@@ -75,5 +80,11 @@ function draw(delta_t) {
 
 var simulation = new Birds(2, Math.sqrt(X**2 + Y**2), BIRDS);
 var animation = new Animation(document, window, draw);
+
+var reset = document.getElementById('reset-sim');
+var toggle = document.getElementById('toggle-anim');
+
+if (reset) { reset.addEventListener('click', simulation.init.bind(simulation), false); }
+if (toggle) { toggle.addEventListener('click', animation.toggle.bind(animation), false); }
 
 animation.play();

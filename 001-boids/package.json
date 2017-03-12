@@ -1,0 +1,22 @@
+{
+  "name": "boids",
+  "version": "1.0.0",
+  "description": "boids",
+  "main": "index.js",
+  "repository": "https://github.com/urbanautomaton.com/birds/001-boids",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "exports-loader": "^0.6.4",
+    "imports-loader": "^0.7.1",
+    "webpack": "^2.2.1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "three": "^0.84.0"
+  }
+}
