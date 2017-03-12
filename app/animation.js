@@ -71,3 +71,5 @@ Animation.prototype._step = function(timestamp) {
     );
   }
 };
+
+export default Animation;

@@ -1,3 +1,5 @@
+import { Vector } from '../vendor/sylvester';
+
 function Birds(dimensions, size, birds) {
   this._dimensions       = dimensions;
   this._size             = size;
@@ -132,3 +134,5 @@ Birds.prototype.eachBird = function(cb) {
     cb(i, this._pos[i], this._vel[i], this._acc[i]);
   }
 };
+
+export default Birds;
