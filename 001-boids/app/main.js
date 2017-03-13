@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { Vector } from '../vendor/sylvester';
 import Birds from './birds';
 import Animation from './animation';
