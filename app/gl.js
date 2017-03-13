@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { Vector } from '../vendor/sylvester';
 import * as THREE from 'three';
 import Birds from './birds';

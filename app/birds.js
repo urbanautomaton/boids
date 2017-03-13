@@ -13,8 +13,7 @@ function Birds(dimensions, size, birds) {
 }
 
 Birds.prototype._meanVector = function(vs) {
-  var sum = _.reduce(
-    vs,
+  var sum = vs.reduce(
     function(sum, el) { return sum.add(el); },
     Vector.Zero(this._dimensions)
   );
