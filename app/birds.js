@@ -14,7 +14,7 @@ function Birds(dimensions, size, birds) {
 
 Birds.prototype._meanVector = function(vs) {
   var sum = vs.reduce(
-    function(sum, el) { return sum.add(el); },
+    (sum, el) => ( sum.add(el) ),
     Vector.Zero(this._dimensions)
   );
 
@@ -40,7 +40,7 @@ Birds.prototype._clamp = function(vector, min, max) {
 Birds.prototype._randomVector = function(minMax) {
   return Vector.Random(this._dimensions).
     x(2 * minMax).
-    map(function(e) { return e - minMax; })
+    map((e) => ( e - minMax ))
 };
 
 Birds.prototype._sees = function(delta, velocity) {
