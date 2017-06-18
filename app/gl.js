@@ -1,10 +1,11 @@
-import { Vector } from '../vendor/sylvester';
 import * as THREE from 'three';
 import Birds from './birds';
 import Animation from './animation';
 
 // Get the DOM element to attach to
 const container = document.querySelector('#container');
+
+// const SHOW_ACCELERATION = false;
 
 // Set the scene size.
 const X = 1280;
@@ -19,17 +20,13 @@ const FAR = 10000;
 // Create a WebGL renderer, camera
 // and a scene
 const renderer = new THREE.WebGLRenderer();
-const camera =
-    new THREE.PerspectiveCamera(
-        VIEW_ANGLE,
-        ASPECT,
-        NEAR,
-        FAR
-    );
+const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 
 camera.position.z = 500;
 
 const scene = new THREE.Scene();
+
+const birds = [];
 
 // Add the camera to the scene.
 scene.add(camera);
@@ -49,27 +46,27 @@ const goalMaterial = new THREE.MeshPhongMaterial({
   color: 0xCC0000,
   emissive: 0x340725,
   side: THREE.DoubleSide,
-  shading: THREE.FlatShading
+  shading: THREE.FlatShading,
 });
 
-const goal = new THREE.Mesh(
+const goalMarker = new THREE.Mesh(
   new THREE.SphereGeometry(RADIUS),
-  goalMaterial
+  goalMaterial,
 );
 
-scene.add(goal);
+scene.add(goalMarker);
 
 // create the bird's material
 const birdMaterial = new THREE.MeshPhongMaterial({
   color: 0x156289,
   emissive: 0x072534,
   side: THREE.DoubleSide,
-  shading: THREE.FlatShading
+  shading: THREE.FlatShading,
 });
 
-const bird = new THREE.Mesh(
+const birdModel = new THREE.Mesh(
   new THREE.ConeGeometry(RADIUS, HEIGHT),
-  birdMaterial
+  birdMaterial,
 );
 
 // create a point light
@@ -83,51 +80,52 @@ pointLight.position.z = 130;
 // add to the scene
 scene.add(pointLight);
 
-var BIRDS = 150;
+const BIRDS = 150;
 
-function drawBird(i, pos, vel, acc) {
-  var direction = new THREE.Vector3(vel.e(1), vel.e(2), vel.e(3)).normalize();
-  var rotation_axis = new THREE.Vector3(0, 1, 0);
+// function drawBird(i, pos, vel, acc) {
+function drawBird(i, pos, vel) {
+  const direction = new THREE.Vector3(vel.e(1), vel.e(2), vel.e(3)).normalize();
+  const rotationAxis = new THREE.Vector3(0, 1, 0);
 
-  var _look = pos.add(vel);
+  // if (SHOW_ACCELERATION) { do something }
+
   birds[i].position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
-  birds[i].quaternion.setFromUnitVectors(rotation_axis, direction);
+  birds[i].quaternion.setFromUnitVectors(rotationAxis, direction);
 }
 
-function updateFrameRate(delta_t) {
-  var rate = 1 / delta_t;
+function updateFrameRate(deltaT) {
+  const rate = 1 / deltaT;
+  const element = document.getElementById('frame-rate');
 
-  var element = document.getElementById('frame-rate');
   if (element) {
     element.textContent = Math.round(rate * 100) / 100;
   }
 }
 
-function draw(delta_t) {
-  updateFrameRate(delta_t);
-  simulation.tick(delta_t);
+const simulation = new Birds(3, Math.sqrt((X ** 2) + (Y ** 2)), BIRDS);
 
-  var _goal = simulation._goal;
+function draw(deltaT) {
+  const goal = simulation.goal;
+
+  updateFrameRate(deltaT);
+  simulation.tick(deltaT);
 
   renderer.render(scene, camera);
   simulation.eachBird(drawBird);
-  goal.position.set(_goal.e(1), _goal.e(2), _goal.e(3) - 600);
+  goalMarker.position.set(goal.e(1), goal.e(2), goal.e(3) - 600);
 }
 
-var simulation = new Birds(3, Math.sqrt(Math.pow(X,2) + Math.pow(Y,2)), BIRDS);
-var animation = new Animation(document, window, draw);
+const animation = new Animation(document, window, draw);
 
-var birds = [];
-
-simulation.eachBird(function(i, pos) {
-  var _bird = bird.clone();
-  birds.push(_bird);
-  _bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
-  scene.add(_bird);
+simulation.eachBird((i, pos) => {
+  const bird = birdModel.clone();
+  birds.push(bird);
+  bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
+  scene.add(bird);
 });
 
-var reset = document.getElementById('reset-sim');
-var toggle = document.getElementById('toggle-anim');
+const reset = document.getElementById('reset-sim');
+const toggle = document.getElementById('toggle-anim');
 
 if (reset) { reset.addEventListener('click', simulation.init.bind(simulation), false); }
 if (toggle) { toggle.addEventListener('click', animation.toggle.bind(animation), false); }

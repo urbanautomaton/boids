@@ -55,14 +55,14 @@ Birds.prototype._repelVector = function(delta) {
 };
 
 Birds.prototype._goalSeeking = function(from) {
-  var heading = this._goal.subtract(from);
+  var heading = this.goal.subtract(from);
 
   return this._clamp(heading, 0, this._goal_limit);
 };
 
 Birds.prototype._updateGoal = function() {
   var obj = this;
-  this._goal = this._randomVector(this._size / 3);
+  this.goal = this._randomVector(this._size / 3);
   window.setTimeout(function() { obj._updateGoal(); }, 5000);
 };
 
