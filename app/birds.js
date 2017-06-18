@@ -1,136 +1,145 @@
 import { Vector } from '../vendor/sylvester';
 
-function Birds(dimensions, size, birds) {
-  this._dimensions       = dimensions;
-  this._size             = size;
-  this._birds            = birds;
-  this._min_velocity     = 40;
-  this._max_velocity     = 200;
-  this._neighbour_radius = 75;
-  this._visible_angle    = Math.PI * .8;
-  this._goal_limit       = 150;
-  this.init();
-}
-
-Birds.prototype._meanVector = function(vs) {
-  var sum = vs.reduce(
-    (sum, el) => ( sum.add(el) ),
-    Vector.Zero(this._dimensions)
-  );
-
-  if (vs.length > 1) {
-    sum = sum.x(1/vs.length);
-  }
-
-  return sum;
-};
-
-Birds.prototype._clamp = function(vector, min, max) {
-  var mod = vector.modulus();
+function clamp(vector, min, max) {
+  const mod = vector.modulus();
 
   if (mod > max) {
     return vector.x(max / mod);
   } else if (mod < min) {
     return vector.x(min / mod);
-  } else {
-    return vector;
   }
-};
 
-Birds.prototype._randomVector = function(minMax) {
-  return Vector.Random(this._dimensions).
-    x(2 * minMax).
-    map((e) => ( e - minMax ))
-};
+  return vector;
+}
 
-Birds.prototype._sees = function(delta, velocity) {
+function meanVector(vs, dimensions) {
+  let sum = vs.reduce(
+    (acc, el) => (acc.add(el)),
+    Vector.Zero(dimensions),
+  );
+
+  if (vs.length > 1) {
+    sum = sum.x(1 / vs.length);
+  }
+
+  return sum;
+}
+
+function repelVector(delta) {
+  return delta.toUnitVector().x(-30 / delta.modulus());
+}
+
+function randomVector(minMax, dimensions) {
+  return Vector.Random(dimensions)
+    .x(2 * minMax)
+    .map(e => (e - minMax));
+}
+
+function Birds(dimensions, size, birds) {
+  this.dimensions       = dimensions;
+  this.size             = size;
+  this.birds            = birds;
+  this.minvelocity     = 40;
+  this.maxvelocity     = 200;
+  this.neighbour_radius = 75;
+  this.visible_angle    = Math.PI * 0.8;
+  this.goal_limit       = 150;
+  this.init();
+}
+
+Birds.prototype.sees = function sees(delta, velocity) {
   return (
-    delta.modulus() <= this._neighbour_radius &&
-    velocity.angleFrom(delta) < this._visible_angle
+    delta.modulus() <= this.neighbour_radius &&
+    velocity.angleFrom(delta) < this.visible_angle
   );
 };
 
-Birds.prototype._repelVector = function(delta) {
-  return delta.toUnitVector().x(-30/delta.modulus());
+Birds.prototype.goalSeeking = function goalSeeking(from) {
+  const heading = this.goal.subtract(from);
+
+  return clamp(heading, 0, this.goal_limit);
 };
 
-Birds.prototype._goalSeeking = function(from) {
-  var heading = this.goal.subtract(from);
-
-  return this._clamp(heading, 0, this._goal_limit);
+Birds.prototype.updateGoal = function updateGoal() {
+  const obj = this;
+  this.goal = randomVector(this.size / 3, this.dimensions);
+  window.setTimeout(() => { obj.updateGoal(); }, 5000);
 };
 
-Birds.prototype._updateGoal = function() {
-  var obj = this;
-  this.goal = this._randomVector(this._size / 3);
-  window.setTimeout(function() { obj._updateGoal(); }, 5000);
-};
+Birds.prototype.updateAcceleration = function updateAcceleration() {
+  let i;
+  let j;
 
-Birds.prototype._updateAcceleration = function() {
-  for (var i=0; i<this._birds; i++) {
-    var repel = Vector.Zero(this._dimensions);
-    var headings = [];
-    var centroids = [];
+  for (i = 0; i < this.birds; i += 1) {
+    let repel = Vector.Zero(this.dimensions);
+    const headings = [];
+    const centroids = [];
 
-    for (var j=0; j<this._birds; j++) {
+    for (j = 0; j < this.birds; j += 1) {
       if (i !== j) {
-        var iToj = this._pos[j].subtract(this._pos[i]);
+        const iToj = this.pos[j].subtract(this.pos[i]);
 
-        if (this._sees(iToj, this._vel[i])) {
-          repel = repel.add(this._repelVector(iToj).x(15));
-          headings.push(this._vel[j]);
+        if (this.sees(iToj, this.vel[i])) {
+          repel = repel.add(repelVector(iToj).x(15));
+          headings.push(this.vel[j]);
           centroids.push(iToj);
         }
       }
     }
 
-    var heading = this._meanVector(headings).x(1.5);
-    var centroid = this._meanVector(centroids);
-    var goal = this._goalSeeking(this._pos[i]);
+    const heading = meanVector(headings, this.dimensions).x(1.5);
+    const centroid = meanVector(centroids, this.dimensions);
+    const goal = this.goalSeeking(this.pos[i]);
 
-    this._acc[i] = repel.add(heading).add(centroid).add(goal);
+    this.acc[i] = repel.add(heading).add(centroid).add(goal);
   }
 };
 
-Birds.prototype._updateVelocity = function(delta_t) {
-  for (var i=0; i<this._birds; i++) {
-    var v1 = this._vel[i].add(this._acc[i].x(delta_t));
+Birds.prototype.updateVelocity = function updateVelocity(deltaT) {
+  let i;
 
-    this._vel[i] = this._clamp(v1, this._min_velocity, this._max_velocity);
+  for (i = 0; i < this.birds; i += 1) {
+    const v1 = this.vel[i].add(this.acc[i].x(deltaT));
+
+    this.vel[i] = clamp(v1, this.minvelocity, this.maxvelocity);
   }
 };
 
-Birds.prototype._updatePosition = function(delta_t) {
-  for (var i=0; i<this._birds; i++) {
-    this._pos[i] = this._pos[i].
-      add(this._vel[i].x(delta_t)).
-      add(this._acc[i].x(0.5 * delta_t * delta_t));
+Birds.prototype.updatePosition = function updatePosition(deltaT) {
+  let i;
+
+  for (i = 0; i < this.birds; i += 1) {
+    this.pos[i] = this.pos[i]
+      .add(this.vel[i].x(deltaT))
+      .add(this.acc[i].x(0.5 * deltaT * deltaT));
   }
 };
 
-Birds.prototype.init = function() {
-  this._updateGoal();
-  this._vel    = [];
-  this._pos    = [];
-  this._acc    = [];
-  this._t_last = null;
+Birds.prototype.init = function init() {
+  this.updateGoal();
+  this.vel    = [];
+  this.pos    = [];
+  this.acc    = [];
+  let i;
 
-  for (var i=0; i<this._birds; i++) {
-    this._vel[i] = this._randomVector(100);
-    this._acc[i] = Vector.Zero(this._dimensions);
-    this._pos[i] = this._randomVector(this._size/2);
+  for (i = 0; i < this.birds; i += 1) {
+    this.vel[i] = randomVector(100, this.dimensions);
+    this.acc[i] = Vector.Zero(this.dimensions);
+    this.pos[i] = randomVector(this.size / 2, this.dimensions);
   }
 };
 
-Birds.prototype.tick = function(delta_t) {
-  this._updateAcceleration();
-  this._updateVelocity(delta_t);
-  this._updatePosition(delta_t);
+Birds.prototype.tick = function tick(deltaT) {
+  this.updateAcceleration();
+  this.updateVelocity(deltaT);
+  this.updatePosition(deltaT);
 };
 
-Birds.prototype.eachBird = function(cb) {
-  for (var i=0; i<this._birds; i++) {
-    cb(i, this._pos[i], this._vel[i], this._acc[i]);
+Birds.prototype.eachBird = function eachBird(cb) {
+  let i;
+
+  for (i = 0; i < this.birds; i += 1) {
+    cb(i, this.pos[i], this.vel[i], this.acc[i]);
   }
 };
 
