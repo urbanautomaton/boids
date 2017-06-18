@@ -17,7 +17,7 @@ ctx.scale(SCALE, SCALE);
 function drawCircle(centre, radius, color, stroke) {
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.arc(centre.e(1), centre.e(2), radius, 0, Math.PI*2, true)
+  ctx.arc(centre.e(1), centre.e(2), radius, 0, Math.PI*2, true);
   ctx.fill();
   if (stroke) { ctx.stroke(); }
 }
@@ -77,7 +77,7 @@ function draw(delta_t) {
   drawCircle(simulation._goal, 3, "red", true);
 }
 
-var simulation = new Birds(2, Math.sqrt(X**2 + Y**2), BIRDS);
+var simulation = new Birds(2, Math.sqrt(Math.pow(X,2) + Math.pow(Y,2)), BIRDS);
 var animation = new Animation(document, window, draw);
 
 var reset = document.getElementById('reset-sim');

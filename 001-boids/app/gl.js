@@ -114,7 +114,7 @@ function draw(delta_t) {
   goal.position.set(_goal.e(1), _goal.e(2), _goal.e(3) - 600);
 }
 
-var simulation = new Birds(3, Math.sqrt(X**2 + Y**2), BIRDS);
+var simulation = new Birds(3, Math.sqrt(Math.pow(X,2) + Math.pow(Y,2)), BIRDS);
 var animation = new Animation(document, window, draw);
 
 var birds = [];
