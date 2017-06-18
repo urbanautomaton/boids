@@ -10,5 +10,10 @@ module.exports = {
     "globals": {
       "document": true,
       "window": true
+    },
+    "rules": {
+      "no-multi-spaces": ["error",
+        { exceptions: { "AssignmentExpression": true } }
+      ]
     }
 };
