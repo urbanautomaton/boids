@@ -12,7 +12,6 @@ const treeMaterial = new THREE.MeshPhongMaterial({
   color: 0x2c6d06,
   emissive: 0x072534,
   side: THREE.DoubleSide,
-  shading: THREE.FlatShading,
 });
 
 Models.bird = (radius, height) => new THREE.Mesh(

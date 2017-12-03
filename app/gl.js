@@ -46,7 +46,6 @@ const goalMaterial = new THREE.MeshPhongMaterial({
   color: 0xCC0000,
   emissive: 0x340725,
   side: THREE.DoubleSide,
-  shading: THREE.FlatShading,
 });
 
 const goalMarker = new THREE.Mesh(
