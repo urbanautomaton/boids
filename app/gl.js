@@ -39,8 +39,8 @@ renderer.setSize(X, Y);
 container.appendChild(renderer.domElement);
 
 // Set up the bird vars
-const RADIUS = 5;
-const HEIGHT = 15;
+const RADIUS = 7.5;
+const HEIGHT = 22.5;
 
 const goalMaterial = new THREE.MeshPhongMaterial({
   color: 0xCC0000,
@@ -105,7 +105,7 @@ function draw(deltaT) {
 const animation = new Animation(document, window, draw);
 
 simulation.eachBird((i, pos) => {
-  const bird = Models.bird(RADIUS, HEIGHT).clone();
+  const bird = Models.tree(RADIUS, HEIGHT).clone();
   birds.push(bird);
   bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
   scene.add(bird);
