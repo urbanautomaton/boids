@@ -23,9 +23,9 @@ Models.tree = (radius, height) => {
   const combinedGeometry = new THREE.Geometry();
 
   [0, 1.5, 3.0].forEach((step) => {
-    const coneGeometry = new THREE.ConeGeometry(radius - step, height);
+    const coneGeometry = new THREE.ConeGeometry(radius - step, height - step);
     const coneMesh = new THREE.Mesh(coneGeometry);
-    coneMesh.position.y = step * radius;
+    coneMesh.position.y = step * (height / 3);
     coneMesh.updateMatrix();
     combinedGeometry.merge(coneMesh.geometry, coneMesh.matrix);
   });

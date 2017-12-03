@@ -40,7 +40,7 @@ container.appendChild(renderer.domElement);
 
 // Set up the bird vars
 const RADIUS = 7.5;
-const HEIGHT = 22.5;
+const HEIGHT = 15;
 
 const goalMaterial = new THREE.MeshPhongMaterial({
   color: 0xCC0000,
