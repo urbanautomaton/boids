@@ -1,11 +1,10 @@
 import * as THREE from 'three';
+import * as dat from '../vendor/dat.gui';
 import Birds from './birds';
 import Animation from './animation';
 
 // Get the DOM element to attach to
 const container = document.querySelector('#container');
-
-// const SHOW_ACCELERATION = false;
 
 // Set the scene size.
 const X = 1280;
@@ -124,10 +123,13 @@ simulation.eachBird((i, pos) => {
   scene.add(bird);
 });
 
-const reset = document.getElementById('reset-sim');
-const toggle = document.getElementById('toggle-anim');
+const paramStore = {
+  Reset: () => { simulation.init(); },
+  'Play/Pause': () => { animation.toggle(); },
+};
 
-if (reset) { reset.addEventListener('click', simulation.init.bind(simulation), false); }
-if (toggle) { toggle.addEventListener('click', animation.toggle.bind(animation), false); }
+const gui = new dat.GUI();
+gui.add(paramStore, 'Reset');
+gui.add(paramStore, 'Play/Pause');
 
 animation.play();
