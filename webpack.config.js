@@ -1,22 +1,21 @@
-var path = require('path');
-
 module.exports = {
   module: {
     rules: [
-      // {
-      //   test: /\.js$/,
-      //   exclude: /node_modules/,
-      //   loader: 'eslint-loader'
-      // },
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "babel-loader"
+        loader: 'babel-loader',
+      },
+      {
+        enforce: 'pre',
+        test: /\.js$/,
+        exclude: /node_modules|vendor|dist/,
+        loader: 'eslint-loader',
       },
       {
         test: require.resolve('./vendor/sylvester'),
-        use: 'exports-loader?Matrix,Vector'
-      }
-    ]
-  }
+        use: 'exports-loader?Matrix,Vector',
+      },
+    ],
+  },
 };
