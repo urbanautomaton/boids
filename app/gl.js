@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import * as dat from '../vendor/dat.gui';
 import Birds from './birds';
 import Animation from './animation';
+import Models from './models';
 
 // Get the DOM element to attach to
 const container = document.querySelector('#container');
@@ -55,19 +56,6 @@ const goalMarker = new THREE.Mesh(
 
 scene.add(goalMarker);
 
-// create the bird's material
-const birdMaterial = new THREE.MeshPhongMaterial({
-  color: 0x156289,
-  emissive: 0x072534,
-  side: THREE.DoubleSide,
-  shading: THREE.FlatShading,
-});
-
-const birdModel = new THREE.Mesh(
-  new THREE.ConeGeometry(RADIUS, HEIGHT),
-  birdMaterial,
-);
-
 // create a point light
 const pointLight = new THREE.PointLight(0xFFFFFF);
 
@@ -117,7 +105,7 @@ function draw(deltaT) {
 const animation = new Animation(document, window, draw);
 
 simulation.eachBird((i, pos) => {
-  const bird = birdModel.clone();
+  const bird = Models.bird(RADIUS, HEIGHT).clone();
   birds.push(bird);
   bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
   scene.add(bird);
