@@ -11,6 +11,13 @@ module.exports = {
         test: require.resolve('./vendor/sylvester'),
         use: 'exports-loader?Matrix,Vector',
       },
+      {
+        test: require.resolve('./vendor/orbitcontrols'),
+        use: [
+          'imports-loader?THREE=three',
+          'exports-loader?THREE.OrbitControls',
+        ],
+      },
     ],
   },
 };
