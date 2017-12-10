@@ -23,7 +23,7 @@ const FAR = 10000;
 const renderer = new THREE.WebGLRenderer();
 const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 
-camera.position.z = 500;
+camera.position.z = 2000;
 
 const scene = new THREE.Scene();
 
@@ -59,6 +59,12 @@ const goalMarker = new THREE.Mesh(
 );
 
 scene.add(goalMarker);
+
+const ground = Models.ground(4000, 4000);
+ground.rotation.x = Math.PI / 2;
+ground.doubleSided = true;
+ground.position.y = -500;
+scene.add(ground);
 
 // create a point light
 const pointLight = new THREE.PointLight(0xFFFFFF);
@@ -129,5 +135,16 @@ sim.add(simulation, 'minvelocity', 0, 100);
 sim.add(simulation, 'maxvelocity', 100, 300);
 sim.add(simulation, 'neighbour_radius', 10, 200);
 sim.add(simulation, 'goal_limit', 50, 200);
+sim.open();
+
+const geom = gui.addFolder('Positioning');
+geom.add(ground.position, 'y', -1000, -500);
+geom.open();
+
+const cam = gui.addFolder('Camera');
+cam.add(camera.position, 'x').listen();
+cam.add(camera.position, 'y').listen();
+cam.add(camera.position, 'z').listen();
+cam.open();
 
 animation.play();
