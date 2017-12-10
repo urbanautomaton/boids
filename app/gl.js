@@ -120,4 +120,10 @@ const gui = new dat.GUI();
 gui.add(paramStore, 'Reset');
 gui.add(paramStore, 'Play/Pause');
 
+const sim = gui.addFolder('Simulation');
+sim.add(simulation, 'minvelocity', 0, 100);
+sim.add(simulation, 'maxvelocity', 100, 300);
+sim.add(simulation, 'neighbour_radius', 10, 200);
+sim.add(simulation, 'goal_limit', 50, 200);
+
 animation.play();
