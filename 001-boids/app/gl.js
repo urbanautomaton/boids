@@ -27,6 +27,9 @@ camera.position.z = 2000;
 
 const scene = new THREE.Scene();
 
+const axesHelper = new THREE.AxisHelper(100);
+scene.add(axesHelper);
+
 const birds = [];
 
 const controls = new OrbitControls(camera);
