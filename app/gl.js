@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as dat from '../vendor/dat.gui';
+import OrbitControls from '../vendor/orbitcontrols';
 import Birds from './birds';
 import Animation from './animation';
 import Models from './models';
@@ -27,6 +28,9 @@ camera.position.z = 500;
 const scene = new THREE.Scene();
 
 const birds = [];
+
+const controls = new OrbitControls(camera);
+controls.enableZoom = true;
 
 // Add the camera to the scene.
 scene.add(camera);
