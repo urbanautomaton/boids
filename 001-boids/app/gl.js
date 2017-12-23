@@ -21,8 +21,9 @@ const FAR = 10000;
 // Create a WebGL renderer, camera
 // and a scene
 const renderer = new THREE.WebGLRenderer();
-const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+renderer.shadowMap.enabled = true;
 
+const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 camera.position.z = 2000;
 
 const scene = new THREE.Scene();
@@ -53,7 +54,6 @@ const goalMaterial = new THREE.MeshPhongMaterial({
   color: 0xCC0000,
   emissive: 0x340725,
   side: THREE.DoubleSide,
-  shading: THREE.FlatShading,
 });
 
 const goalMarker = new THREE.Mesh(
@@ -64,21 +64,39 @@ const goalMarker = new THREE.Mesh(
 scene.add(goalMarker);
 
 const ground = Models.ground(4000, 4000);
+ground.receiveShadow = true;
 ground.rotation.x = Math.PI / 2;
 ground.doubleSided = true;
 ground.position.y = -500;
 scene.add(ground);
 
 // create a point light
-const pointLight = new THREE.PointLight(0xFFFFFF);
-
+const pointLight = new THREE.DirectionalLight(0xFFFFFF);
 // set its position
 pointLight.position.x = 10;
 pointLight.position.y = 50;
 pointLight.position.z = 130;
 
+pointLight.castShadow = true;
+// pointLight.shadow.camera.near = 0.5;    // default
+pointLight.shadow.camera.far = 5000;
+
 // add to the scene
 scene.add(pointLight);
+
+const lightMaterial = new THREE.MeshPhongMaterial({
+  color: 0xf4f142,
+  side: THREE.DoubleSide,
+});
+const lightMarker = new THREE.Mesh(
+  new THREE.SphereGeometry(RADIUS),
+  lightMaterial,
+);
+lightMarker.position.setFromMatrixPosition(pointLight.matrixWorld);
+scene.add(lightMarker);
+
+const helper = new THREE.CameraHelper(pointLight.shadow.camera);
+scene.add(helper);
 
 const BIRDS = 150;
 
@@ -119,6 +137,7 @@ const animation = new Animation(document, window, draw);
 
 simulation.eachBird((i, pos) => {
   const bird = Models.bird(RADIUS, HEIGHT).clone();
+  bird.castShadow = true;
   birds.push(bird);
   bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
   scene.add(bird);
