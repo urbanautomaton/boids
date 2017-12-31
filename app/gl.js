@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import * as dat from '../vendor/dat.gui';
 import OrbitControls from '../vendor/orbitcontrols';
-import Birds from './birds';
+import { randomVector } from './vectorUtil';
+import Bird from './bird';
 import Animation from './animation';
 import Models from './models';
 
@@ -11,6 +12,9 @@ const container = document.querySelector('#container');
 // Set the scene size.
 const X = 1280;
 const Y = 720;
+
+const SIZE = Math.sqrt((X ** 2) + (Y ** 2));
+const DIMENSIONS = 3;
 
 // Set some camera attributes.
 const VIEW_ANGLE = 45;
@@ -30,8 +34,6 @@ const scene = new THREE.Scene();
 const axesHelper = new THREE.AxisHelper(100);
 scene.add(axesHelper);
 
-const birds = [];
-
 const controls = new OrbitControls(camera);
 controls.enableZoom = true;
 
@@ -45,10 +47,6 @@ renderer.setSize(X, Y);
 // DOM element.
 container.appendChild(renderer.domElement);
 
-// Set up the bird vars
-const RADIUS = 5;
-const HEIGHT = 15;
-
 const goalMaterial = new THREE.MeshPhongMaterial({
   color: 0xCC0000,
   emissive: 0x340725,
@@ -56,7 +54,7 @@ const goalMaterial = new THREE.MeshPhongMaterial({
 });
 
 const goalMarker = new THREE.Mesh(
-  new THREE.SphereGeometry(RADIUS),
+  new THREE.SphereGeometry(10),
   goalMaterial,
 );
 
@@ -81,17 +79,6 @@ scene.add(pointLight);
 
 const BIRDS = 150;
 
-// function drawBird(i, pos, vel, acc) {
-function drawBird(i, pos, vel) {
-  const direction = new THREE.Vector3(vel.e(1), vel.e(2), vel.e(3)).normalize();
-  const rotationAxis = new THREE.Vector3(0, 1, 0);
-
-  // if (SHOW_ACCELERATION) { do something }
-
-  birds[i].position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
-  birds[i].quaternion.setFromUnitVectors(rotationAxis, direction);
-}
-
 function updateFrameRate(deltaT) {
   const rate = 1 / deltaT;
   const element = document.getElementById('frame-rate');
@@ -101,30 +88,46 @@ function updateFrameRate(deltaT) {
   }
 }
 
-const simulation = new Birds(3, Math.sqrt((X ** 2) + (Y ** 2)), BIRDS);
+const birdConfig = {
+  dimensions: DIMENSIONS,
+  size: SIZE,
+  min_velocity: 40,
+  max_velocity: 200,
+  neighbour_radius: 75,
+  visible_angle: Math.PI * 0.8,
+  goal_limit: 150,
+  goal: randomVector(SIZE / 3, DIMENSIONS),
+};
+
+function updateGoal() {
+  birdConfig.goal = randomVector(birdConfig.size / 3, birdConfig.dimensions);
+  window.setTimeout(() => { updateGoal(); }, 5000);
+}
+
+updateGoal();
+
+const world = {
+  birds: [],
+};
+
+for (let i = 0; i < BIRDS; i += 1) {
+  world.birds.push(new Bird(birdConfig, scene));
+}
 
 function draw(deltaT) {
-  const goal = simulation.goal;
+  const goal = birdConfig.goal;
 
   updateFrameRate(deltaT);
-  simulation.tick(deltaT);
+  world.birds.forEach((bird) => { bird.update(deltaT, world); });
+  goalMarker.position.set(goal.e(1), goal.e(2), goal.e(3) - 600);
 
   renderer.render(scene, camera);
-  simulation.eachBird(drawBird);
-  goalMarker.position.set(goal.e(1), goal.e(2), goal.e(3) - 600);
 }
 
 const animation = new Animation(document, window, draw);
 
-simulation.eachBird((i, pos) => {
-  const bird = Models.bird(RADIUS, HEIGHT).clone();
-  birds.push(bird);
-  bird.position.set(pos.e(1), pos.e(2), pos.e(3) - 600);
-  scene.add(bird);
-});
-
 const paramStore = {
-  Reset: () => { simulation.init(); },
+  Reset: () => { world.birds.forEach((bird) => { bird.init(); }); },
   'Play/Pause': () => { animation.toggle(); },
 };
 
@@ -133,10 +136,10 @@ gui.add(paramStore, 'Reset');
 gui.add(paramStore, 'Play/Pause');
 
 const sim = gui.addFolder('Simulation');
-sim.add(simulation, 'minvelocity', 0, 100);
-sim.add(simulation, 'maxvelocity', 100, 300);
-sim.add(simulation, 'neighbour_radius', 10, 200);
-sim.add(simulation, 'goal_limit', 50, 200);
+sim.add(birdConfig, 'min_velocity', 0, 100);
+sim.add(birdConfig, 'max_velocity', 100, 300);
+sim.add(birdConfig, 'neighbour_radius', 10, 200);
+sim.add(birdConfig, 'goal_limit', 50, 200);
 sim.open();
 
 const geom = gui.addFolder('Positioning');
