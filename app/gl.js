@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import * as dat from '../vendor/dat.gui';
 import OrbitControls from '../vendor/orbitcontrols';
+import { Vector } from '../vendor/sylvester';
 import { randomVector } from './vectorUtil';
 import Bird from './bird';
 import Animation from './animation';
@@ -27,7 +28,8 @@ const FAR = 10000;
 const renderer = new THREE.WebGLRenderer();
 const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 
-camera.position.z = 2000;
+camera.position.y = 500;
+camera.position.z = 1000;
 
 const scene = new THREE.Scene();
 
@@ -63,7 +65,6 @@ scene.add(goalMarker);
 const ground = Models.ground(4000, 4000);
 ground.rotation.x = Math.PI / 2;
 ground.doubleSided = true;
-ground.position.y = -500;
 scene.add(ground);
 
 // create a point light
@@ -72,7 +73,7 @@ const pointLight = new THREE.PointLight(0xFFFFFF);
 // set its position
 pointLight.position.x = 10;
 pointLight.position.y = 50;
-pointLight.position.z = 130;
+pointLight.position.z = 500;
 
 // add to the scene
 scene.add(pointLight);
@@ -100,7 +101,7 @@ const birdConfig = {
 };
 
 function updateGoal() {
-  birdConfig.goal = randomVector(birdConfig.size / 3, birdConfig.dimensions);
+  birdConfig.goal = randomVector(SIZE / 3, DIMENSIONS).add(Vector.create([0, 500, 0]));
   window.setTimeout(() => { updateGoal(); }, 5000);
 }
 

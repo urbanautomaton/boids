@@ -23,11 +23,11 @@ class Bird {
   init() {
     this.vel = randomVector(100, this.config.dimensions);
     this.acc = Vector.Zero(this.config.dimensions);
-    this.pos = randomVector(this.config.size / 2, this.config.dimensions);
+    this.pos = randomVector(this.config.size / 2, this.config.dimensions)
+      .add(Vector.create([0, 500, 0]));
   }
 
   update(deltaT, world) {
-    console.log('updating bird');
     this.updateAcceleration(world);
     this.updateVelocity(deltaT);
     this.updatePosition(deltaT);
@@ -72,7 +72,7 @@ class Bird {
     const direction = new THREE.Vector3(this.vel.e(1), this.vel.e(2), this.vel.e(3)).normalize();
     const rotationAxis = new THREE.Vector3(0, 1, 0);
 
-    this.model.position.set(this.pos.e(1), this.pos.e(2), this.pos.e(3) - 600);
+    this.model.position.set(this.pos.e(1), this.pos.e(2), this.pos.e(3));
     this.model.quaternion.setFromUnitVectors(rotationAxis, direction);
   }
 
