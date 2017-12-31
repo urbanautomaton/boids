@@ -39,8 +39,8 @@ function Birds(dimensions, size, birds) {
   this.dimensions       = dimensions;
   this.size             = size;
   this.birds            = birds;
-  this.minvelocity     = 40;
-  this.maxvelocity     = 200;
+  this.min_velocity     = 40;
+  this.max_velocity     = 200;
   this.neighbour_radius = 75;
   this.visible_angle    = Math.PI * 0.8;
   this.goal_limit       = 150;
@@ -101,7 +101,7 @@ Birds.prototype.updateVelocity = function updateVelocity(deltaT) {
   for (i = 0; i < this.birds; i += 1) {
     const v1 = this.vel[i].add(this.acc[i].x(deltaT));
 
-    this.vel[i] = clamp(v1, this.minvelocity, this.maxvelocity);
+    this.vel[i] = clamp(v1, this.min_velocity, this.max_velocity);
   }
 };
 
