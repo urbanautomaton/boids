@@ -23,4 +23,15 @@ Models.ground = (width, length) => new THREE.Mesh(
   groundMaterial,
 );
 
+const goalMaterial = new THREE.MeshPhongMaterial({
+  color: 0xCC0000,
+  emissive: 0x340725,
+  side: THREE.DoubleSide,
+});
+
+Models.goalMarker = (radius) => new THREE.Mesh(
+  new THREE.SphereGeometry(radius),
+  goalMaterial,
+);
+
 export default Models;

@@ -49,17 +49,7 @@ renderer.setSize(X, Y);
 // DOM element.
 container.appendChild(renderer.domElement);
 
-const goalMaterial = new THREE.MeshPhongMaterial({
-  color: 0xCC0000,
-  emissive: 0x340725,
-  side: THREE.DoubleSide,
-});
-
-const goalMarker = new THREE.Mesh(
-  new THREE.SphereGeometry(10),
-  goalMaterial,
-);
-
+const goalMarker = Models.goalMarker(10);
 scene.add(goalMarker);
 
 const ground = Models.ground(4000, 4000);
