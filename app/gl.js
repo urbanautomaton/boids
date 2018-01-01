@@ -23,15 +23,16 @@ const ASPECT = X / Y;
 const NEAR = 0.1;
 const FAR = 10000;
 
-// Create a WebGL renderer, camera
-// and a scene
 const renderer = new THREE.WebGLRenderer();
-const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-
-camera.position.y = 500;
-camera.position.z = 1000;
+renderer.setSize(X, Y);
+container.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+camera.position.y = 500;
+camera.position.z = 1000;
+scene.add(camera);
 
 const axesHelper = new THREE.AxisHelper(100);
 scene.add(axesHelper);
@@ -39,16 +40,6 @@ scene.add(axesHelper);
 const controls = new OrbitControls(camera);
 controls.enableZoom = true;
 controls.enablePan = true;
-
-// Add the camera to the scene.
-scene.add(camera);
-
-// Start the renderer.
-renderer.setSize(X, Y);
-
-// Attach the renderer-supplied
-// DOM element.
-container.appendChild(renderer.domElement);
 
 const goalMarker = Models.goalMarker(10);
 scene.add(goalMarker);
@@ -58,15 +49,10 @@ ground.rotation.x = Math.PI / 2;
 ground.doubleSided = true;
 scene.add(ground);
 
-// create a point light
 const pointLight = new THREE.PointLight(0xFFFFFF);
-
-// set its position
 pointLight.position.x = 10;
 pointLight.position.y = 50;
 pointLight.position.z = 500;
-
-// add to the scene
 scene.add(pointLight);
 
 const BIRDS = 150;
