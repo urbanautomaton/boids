@@ -85,7 +85,7 @@ for (let i = 0; i < BIRDS; i += 1) {
 function draw(deltaT) {
   updateFrameRate(deltaT);
   world.birds.forEach((bird) => { bird.update(deltaT, world); });
-  goalMarker.position.set(world.goal.e(1), world.goal.e(2), world.goal.e(3) - 600);
+  goalMarker.position.set(world.goal.e(1), world.goal.e(2), world.goal.e(3));
 
   renderer.render(scene, camera);
 }
