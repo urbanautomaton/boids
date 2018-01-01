@@ -55,6 +55,8 @@ pointLight.position.y = 50;
 pointLight.position.z = 500;
 scene.add(pointLight);
 
+scene.add(new THREE.AmbientLight(0x404040));
+
 const BIRDS = 150;
 
 function updateFrameRate(deltaT) {
