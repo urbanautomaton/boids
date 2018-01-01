@@ -38,6 +38,7 @@ scene.add(axesHelper);
 
 const controls = new OrbitControls(camera);
 controls.enableZoom = true;
+controls.enablePan = true;
 
 // Add the camera to the scene.
 scene.add(camera);
