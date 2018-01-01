@@ -51,7 +51,7 @@ class Bird {
 
     const heading = meanVector(headings, this.config.dimensions).x(1.5);
     const centroid = meanVector(centroids, this.config.dimensions);
-    const goal = this.goalSeeking(this.pos);
+    const goal = this.goalSeeking(world.goal);
 
     this.acc = repel.add(heading).add(centroid).add(goal);
   }
@@ -76,8 +76,8 @@ class Bird {
     this.model.quaternion.setFromUnitVectors(rotationAxis, direction);
   }
 
-  goalSeeking(from) {
-    const heading = this.config.goal.subtract(from);
+  goalSeeking(goal) {
+    const heading = goal.subtract(this.pos);
 
     return clamp(heading, 0, this.config.goal_limit);
   }
