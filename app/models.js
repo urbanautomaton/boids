@@ -29,7 +29,7 @@ const goalMaterial = new THREE.MeshPhongMaterial({
   side: THREE.DoubleSide,
 });
 
-Models.goalMarker = (radius) => new THREE.Mesh(
+Models.goalMarker = radius => new THREE.Mesh(
   new THREE.SphereGeometry(radius),
   goalMaterial,
 );

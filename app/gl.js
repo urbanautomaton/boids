@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import OrbitControls from '../vendor/orbitcontrols';
-import { Vector } from '../vendor/sylvester';
-import { randomVector } from './vectorUtil';
 import Bird from './bird';
+import Goal from './goal';
 import Animation from './animation';
 import Models from './models';
 import World from './world';
@@ -40,9 +39,6 @@ scene.add(axesHelper);
 const controls = new OrbitControls(camera);
 controls.enableZoom = true;
 controls.enablePan = true;
-
-const goalMarker = Models.goalMarker(10);
-scene.add(goalMarker);
 
 const ground = Models.ground(4000, 4000);
 ground.rotation.x = Math.PI / 2;
@@ -82,10 +78,11 @@ for (let i = 0; i < BIRDS; i += 1) {
   world.birds.push(new Bird(birdConfig, scene));
 }
 
+world.goal = new Goal(world, scene);
+
 function draw(deltaT) {
   updateFrameRate(deltaT);
-  world.birds.forEach((bird) => { bird.update(deltaT, world); });
-  goalMarker.position.set(world.goal.e(1), world.goal.e(2), world.goal.e(3));
+  world.update(deltaT);
 
   renderer.render(scene, camera);
 }

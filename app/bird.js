@@ -51,7 +51,7 @@ class Bird {
 
     const heading = meanVector(headings, this.config.dimensions).x(1.5);
     const centroid = meanVector(centroids, this.config.dimensions);
-    const goal = this.goalSeeking(world.goal);
+    const goal = this.goalSeeking(world.goal.pos);
 
     this.acc = repel.add(heading).add(centroid).add(goal);
   }
