@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import OrbitControls from '../vendor/orbitcontrols';
+import Stats from '../vendor/stats';
 import Bird from './bird';
 import Goal from './goal';
 import Animation from './animation';
@@ -53,15 +54,6 @@ scene.add(pointLight);
 
 scene.add(new THREE.AmbientLight(0x404040));
 
-function updateFrameRate(deltaT) {
-  const rate = 1 / deltaT;
-  const element = document.getElementById('frame-rate');
-
-  if (element) {
-    element.textContent = Math.round(rate * 100) / 100;
-  }
-}
-
 const birdConfig = {
   dimensions: DIMENSIONS,
   size: SIZE,
@@ -80,11 +72,15 @@ for (let i = 0; i < BIRDS; i += 1) {
 
 world.goal = new Goal(world, scene);
 
-function draw(deltaT) {
-  updateFrameRate(deltaT);
-  world.update(deltaT);
+const stats = new Stats();
+stats.showPanel(0);
+document.body.appendChild(stats.dom);
 
+function draw(deltaT) {
+  stats.begin();
+  world.update(deltaT);
   renderer.render(scene, camera);
+  stats.end();
 }
 
 const animation = new Animation(document, window, draw);
