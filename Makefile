@@ -15,7 +15,7 @@ GL_BUNDLE := $(OUT)/gl_bundle.js
 
 default: all
 
-all: $(BUNDLE) $(GL_BUNDLE)
+all: $(GL_BUNDLE)
 
 $(BUNDLE): $(SRC_FILES)
 	$(WEBPACK) $(APP) $(BUNDLE)
