@@ -7,6 +7,9 @@ with a ton of boids in it.
 
 ## Usage
 
+**NB** This is a personal project and while I'm trying to keep the
+master branch working, at any given time it may be totally bollocksed.
+
 You need a recent node installed (it was 6.something when I started,
 it's 8.9ish as I type).
 
